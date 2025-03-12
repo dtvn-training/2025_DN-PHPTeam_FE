@@ -1,7 +1,6 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import './utils/Fontawesome';
 import AuthRoutes from './roots/AuthRoutes';
 import PrivateRoutes from './roots/PrivateRoutes';
 import CreatePost from './pages/CreatePost';

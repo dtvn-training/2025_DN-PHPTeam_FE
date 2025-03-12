@@ -7,9 +7,15 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const fetchUser = async () => {
         if (localStorage.getItem('access_token')) {
-            const response = await getUserFromToken();
-            if (response.status === 200) {
-                setUser(response.data.data);
+            try {
+                const response = await getUserFromToken();
+                if (response.status === 200) {
+                    setUser(response.data.data);
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
             }
         }
         setLoading(false);
