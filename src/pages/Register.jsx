@@ -7,10 +7,11 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { schemaRegister } from '../utils/ValidationForm';
-import { register as registerUser } from '../services/AuthService';
 import { notification } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 function Register() {
+    const { handleRegister } = useAuth();
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,34 +35,30 @@ function Register() {
         });
     }, [errors.email, errors.password, errors.fullname, errors.confirmPassword]);
 
-    const handleRegister = async (data) => {
-        try {
-            const response = await registerUser(data.email, data.fullname, data.password);
-            if (response && response.status === 201) {
-                notification.open({
-                    type: 'success',
-                    message: 'Register successfully',
-                    description: 'Register successfully. Please login now!',
-                    duration: 2,
-                });
-                navigate('/login');
-            }
-        } catch (e) {
-            if (e.response.data.errors.email)
-                notification.open({
-                    type: 'error',
-                    message: 'Register fail',
-                    description: 'Email have already exists',
-                    duration: 2,
-                });
-            else if (e.response.data.errors.password)
-                notification.open({
-                    type: 'error',
-                    message: 'Register fail',
-                    description: 'Password must be at least 6 characters',
-                    duration: 2,
-                });
-        }
+    const onSubmit = async (data) => {
+        const response = await handleRegister(data);
+        if (response === 201) {
+            notification.open({
+                type: 'success',
+                message: 'Register successfully',
+                description: 'Register successfully. Please login now!',
+                duration: 2,
+            });
+            navigate('/login');
+        } else if (response.email)
+            notification.open({
+                type: 'error',
+                message: 'Register fail',
+                description: 'Email have already exists',
+                duration: 2,
+            });
+        else if (response.password)
+            notification.open({
+                type: 'error',
+                message: 'Register fail',
+                description: 'Password must be at least 6 characters',
+                duration: 2,
+            });
     };
     return (
         <div className="flex flex-col items-center lg:flex-row">
@@ -75,7 +72,7 @@ function Register() {
                 <h1 className="mb-[3px] text-center text-[30px] font-bold text-[#111827]">Welcome Back</h1>
                 <p className="mb-[40px] text-center text-[#4B5563]">Please enter your details to register</p>
 
-                <form onSubmit={handleSubmit(handleRegister)} action="#">
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <div>
                         <div className="mb-[16px]">
                             <label htmlFor="email" className="mb-[4px] block text-[14px] text-[#4B5563]">

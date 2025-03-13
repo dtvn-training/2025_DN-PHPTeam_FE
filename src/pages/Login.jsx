@@ -6,13 +6,12 @@ import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { login } from '../services/AuthService';
 import useAuth from '../hooks/useAuth';
 import { schemaLogin } from '../utils/ValidationForm';
 import { notification } from 'antd';
 
 function Login() {
-    const { setUser } = useAuth();
+    const { handleLogin } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const {
         register,
@@ -31,22 +30,15 @@ function Login() {
         });
     }, [errors.email, errors.password]);
 
-    const handleLogin = async (data) => {
-        try {
-            const response = await login(data.email, data.password);
-
-            if (response && response.status === 200) {
-                localStorage.setItem('access_token', response.data.access_token);
-                setUser(response.data.user);
-            }
-        } catch (e) {
-            if (e.response.data.message === 'Unauthorized')
-                notification.open({
-                    type: 'error',
-                    message: 'Login fail',
-                    description: 'Incorrect email or password',
-                    duration: 2,
-                });
+    const onSubmit = async (data) => {
+        const response = await handleLogin(data);
+        if (response === 401) {
+            notification.open({
+                type: 'error',
+                message: 'Login fail',
+                description: 'Incorrect email or password',
+                duration: 2,
+            });
         }
     };
     return (
@@ -60,7 +52,7 @@ function Login() {
             <div className="flex w-[100%] flex-1 flex-col px-[24px] sm:w-[70%] lg:w-[50%] lg:px-[50px] xl:px-[100px] 2xl:px-[150px]">
                 <h1 className="mb-[3px] text-center text-[30px] font-bold text-[#111827]">Welcome Back</h1>
                 <p className="mb-[40px] text-center text-[#4B5563]">Please enter your details to login</p>
-                <form onSubmit={handleSubmit(handleLogin)} action="#">
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <div>
                         <div className="mb-[16px]">
                             <label htmlFor="email" className="mb-[4px] block text-[14px] text-[#4B5563]">
