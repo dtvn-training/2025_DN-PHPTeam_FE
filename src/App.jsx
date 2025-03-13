@@ -5,6 +5,7 @@ import AuthRoutes from './roots/AuthRoutes';
 import PrivateRoutes from './roots/PrivateRoutes';
 import CreatePost from './pages/CreatePost';
 import ViewHistory from './pages/ViewHistory';
+import NoPage from './pages/NoPage';
 function App() {
     return (
         <Router>
@@ -18,6 +19,8 @@ function App() {
                     <Route index element={<CreatePost />} />
                     <Route path="viewhistory" element={<ViewHistory />} />
                 </Route>
+
+                <Route path="/*" element={<NoPage />}></Route>
             </Routes>
         </Router>
     );
