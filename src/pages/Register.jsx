@@ -116,7 +116,7 @@ function Register() {
                                 <button
                                     type="button"
                                     className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    onClick={() => setShowPassword((preShowPassword) => !preShowPassword)}
                                 >
                                     <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
                                 </button>
@@ -138,7 +138,9 @@ function Register() {
                                 <button
                                     type="button"
                                     className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    onClick={() =>
+                                        setShowConfirmPassword((preShowConfirmPassword) => !preShowConfirmPassword)
+                                    }
                                 >
                                     <FontAwesomeIcon icon={showConfirmPassword ? faEye : faEyeSlash} />
                                 </button>

@@ -1,11 +1,11 @@
 import useAuth from '../hooks/useAuth';
-import { FiLoader } from 'react-icons/fi';
 import Layout from '../components/Layout';
 import Landing from '../pages/Landing';
+import Loading from '../components/Loading';
 const PrivateRoutes = () => {
     const { user, loading } = useAuth();
 
-    if (loading) return <FiLoader />;
+    if (loading) return <Loading />;
 
     return user ? <Layout /> : <Landing />;
 };

@@ -18,8 +18,8 @@ const Landing = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-    const list_nav = ['Features', 'Pricing', 'Testimonials', 'FAQ'];
-    const items_mobile_nav = [
+    const listNav = ['Features', 'Pricing', 'Testimonials', 'FAQ'];
+    const itemsMobileNav = [
         {
             key: '1',
             label: <a href="#">Features</a>,
@@ -41,7 +41,7 @@ const Landing = () => {
             label: <a href="/login">Login</a>,
         },
     ];
-    const list_social = [
+    const listSocial = [
         <FontAwesomeIcon icon={faFacebook} className="text-[#2563EB]" size="2xl" />,
         <FontAwesomeIcon icon={faInstagram} className="text-[#DB2777]" size="2xl" />,
         <FontAwesomeIcon icon={faTwitter} className="text-[#60A5FA]" size="2xl" />,
@@ -49,7 +49,7 @@ const Landing = () => {
         <FontAwesomeIcon icon={faTiktok} className="text-[#111827]" size="2xl" />,
     ];
 
-    const list_benefit = [
+    const listBenefit = [
         {
             icon: <FontAwesomeIcon icon={faCalendar} />,
             title: 'Smart Scheduling',
@@ -67,7 +67,7 @@ const Landing = () => {
         },
     ];
 
-    const list_user = [
+    const listUser = [
         {
             avatar: user,
             name: 'Sarah Johnson',
@@ -100,7 +100,7 @@ const Landing = () => {
                     <div className="block sm:hidden">
                         <Dropdown
                             menu={{
-                                items: items_mobile_nav,
+                                items: itemsMobileNav,
                             }}
                             open={open}
                         >
@@ -109,8 +109,8 @@ const Landing = () => {
                     </div>
 
                     <ul className="hidden items-center sm:flex">
-                        {list_nav &&
-                            list_nav.map((item, index) => (
+                        {listNav &&
+                            listNav.map((item, index) => (
                                 <li
                                     className="px-[16px] text-[#4B5563] hover:font-[600] hover:text-[#2563EB]"
                                     key={index}
@@ -154,8 +154,8 @@ const Landing = () => {
                         </div>
 
                         <ul className="mt-[52px] flex items-center justify-center">
-                            {list_social &&
-                                list_social.map((item, index) => (
+                            {listSocial &&
+                                listSocial.map((item, index) => (
                                     <li className="px-[16px]" key={index}>
                                         {item}
                                     </li>
@@ -170,8 +170,8 @@ const Landing = () => {
                     </h1>
 
                     <div className="mt-[56px] grid grid-cols-1 gap-[32px] md:grid-cols-2 lg:grid-cols-3">
-                        {list_benefit &&
-                            list_benefit.map((item, index) => (
+                        {listBenefit &&
+                            listBenefit.map((item, index) => (
                                 <div key={index} className="rounded-[16px] bg-[#F9FAFB] p-[16px_24px]">
                                     <div className="flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#DBEAFE] text-[20px] text-[#2563EB]">
                                         {item.icon}
@@ -187,8 +187,8 @@ const Landing = () => {
                     <h1 className="text-center text-[36px] font-bold">Trusted by Social Media Managers</h1>
 
                     <div className="mt-[56px] grid grid-cols-1 gap-[32px] md:grid-cols-2 lg:grid-cols-3">
-                        {list_user &&
-                            list_user.map((item, index) => (
+                        {listUser &&
+                            listUser.map((item, index) => (
                                 <div key={index} className="rounded-[16px] bg-[#F9FAFB] p-[16px_24px]">
                                     <div className="flex">
                                         <img

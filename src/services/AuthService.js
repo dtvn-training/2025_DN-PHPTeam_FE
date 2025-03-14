@@ -1,4 +1,4 @@
-import axios from './AxiosInstance';
+import axios from './axiosInstance';
 
 const login = (email, password) => {
     return axios.post('/login', { email, password });

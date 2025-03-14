@@ -1,7 +1,7 @@
-import axios from './AxiosInstance';
+import axios from './axiosInstance';
 
 const getUserFromToken = () => {
-    return axios.get('/profile/me');
+    return axios.get('api/profile/me');
 };
 
 export { getUserFromToken };

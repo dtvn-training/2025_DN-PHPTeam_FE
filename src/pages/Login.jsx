@@ -83,7 +83,7 @@ function Login() {
                                 <button
                                     type="button"
                                     className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    onClick={() => setShowPassword((prev) => !prev)}
                                 >
                                     <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
                                 </button>

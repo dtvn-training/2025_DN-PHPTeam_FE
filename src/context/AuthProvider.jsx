@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from 'react';
-import { getUserFromToken } from '../services/UserService';
-import { login, register as registerUser } from '../services/AuthService';
+import { getUserFromToken } from '../services/userService';
+import { login, register as registerUser } from '../services/authService';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
