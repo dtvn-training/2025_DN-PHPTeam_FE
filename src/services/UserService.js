@@ -1,6 +1,6 @@
 import axios from './axiosInstance';
 
-const getUserFromToken = () => {
+const getUserFromToken = async () => {
     return axios.get('api/profile/me');
 };
 

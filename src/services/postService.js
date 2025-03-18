@@ -1,16 +1,24 @@
 import axios from './axiosInstance';
 
-const postToLinkedin = (message, files) => {
-    const formData = new FormData();
-    formData.append('message', message);
-    files.forEach((file) => {
-        formData.append('images[]', file);
-    });
-    return axios.post('/api/linkedin/post', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-    });
-};
+const createPost = async (content, mediaUrls, scheduledTime, listPlatforms) => {
+    const data = {
+        "content": content,
+        "mediaUrls": mediaUrls,
+        "scheduledTime": scheduledTime,
+        "listPlatforms": listPlatforms
+    };
+    const result = await axios.post('/api/posts', data);
+    return result.data;
+}
 
-export { postToLinkedin };
+const getMyPosts = async () => {
+    const myPosts = await axios.get('/api/profile/posts');
+    return myPosts.data?.data;
+}
+
+const getPostDetail = async (id) => {
+    const myPosts = await axios.get(`/api/posts/${id}`);
+    return myPosts.data?.data;
+}
+
+export { createPost, getMyPosts, getPostDetail };

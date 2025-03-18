@@ -7,6 +7,11 @@ import { Link } from 'react-router-dom';
 const SideBar = () => {
     const listNavigations = [
         {
+            label: 'Dashboard',
+            path: '/dashboard',
+            icon: <FontAwesomeIcon icon={faChartSimple} />,
+        },
+        {
             label: 'Create Post',
             path: '/',
             icon: <FontAwesomeIcon icon={faPlus} />,
@@ -15,11 +20,6 @@ const SideBar = () => {
             label: 'View History',
             path: '/viewhistory',
             icon: <FontAwesomeIcon icon={faClockRotateLeft} />,
-        },
-        {
-            label: 'Interaction',
-            path: '/interaction',
-            icon: <FontAwesomeIcon icon={faChartSimple} />,
         },
     ];
     return (
