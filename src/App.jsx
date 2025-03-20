@@ -5,7 +5,10 @@ import AuthRoutes from './roots/AuthRoutes';
 import PrivateRoutes from './roots/PrivateRoutes';
 import CreatePost from './pages/CreatePost';
 import ViewHistory from './pages/ViewHistory';
+import PostDetail from './pages/PostDetail';
+import Interaction from './pages/Interaction';
 import NoPage from './pages/NoPage';
+
 function App() {
     return (
         <Router>
@@ -17,7 +20,9 @@ function App() {
 
                 <Route path="/" element={<PrivateRoutes />}>
                     <Route index element={<CreatePost />} />
-                    <Route path="viewhistory" element={<ViewHistory />} />
+                    <Route path="/viewhistory" element={<ViewHistory />} />
+                    <Route path="/posts/:id" element={<PostDetail />} />
+                    <Route path="/interactions/:postPlatformId" element={<Interaction />} />
                 </Route>
 
                 <Route path="/*" element={<NoPage />}></Route>

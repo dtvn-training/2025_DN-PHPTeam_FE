@@ -1,7 +1,8 @@
 import axios from './axiosInstance';
 
-const getSocialAccountsOfUser = () => {
-    return axios.get('api/profile/social-accounts');
+const getSocialAccountsOfUser = async () => {
+    const result = await axios.get('api/profile/social-accounts');
+    return result.data
 };
 
 export { getSocialAccountsOfUser };
