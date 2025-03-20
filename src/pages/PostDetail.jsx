@@ -1,13 +1,15 @@
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { getPostDetail } from "../services/postService";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { formatTimestamp } from '../utils/ConvertDateTime';
 import { PostStatus, ImagePlatform } from "../utils/Enum";
+import { getInteractionsByPost } from "../services/interactionService";
 
 const PostDetail = () => {
     const { id } = useParams();
     const location = useLocation();
     const [postData, setPostData] = useState(location.state?.post || {});
+    const hasFetchedInteractions = useRef(false);
 
     const navigate = useNavigate();
     const handleViewInteractionClick = (postPlatformId) => {
@@ -15,18 +17,53 @@ const PostDetail = () => {
     };
 
     useEffect(() => {
-        if (!location.state?.post) {
-            const fetchPost = async () => {
-                try {
-                    const post = await getPostDetail(id);
-                    setPostData(post || {});
-                } catch (error) {
-                    console.error("Error fetching post:", error);
-                }
-            };
+        let post = location.state?.post;
+
+        const fetchPost = async () => {
+            try {
+                post = await getPostDetail(id);
+                setPostData(post || {});
+            } catch (error) {
+                console.error("Error fetching post:", error);
+            }
+        };
+
+        if (!post) {
             fetchPost();
+        } else {
+            setPostData(post);
         }
     }, [id, location.state?.post]);
+
+    useEffect(() => {
+        if (!postData || !postData.postPlatforms || postData.postPlatforms.length === 0 || hasFetchedInteractions.current) return;
+
+        const fetchInteractions = async () => {
+            try {
+                const interactions = await getInteractionsByPost(id);
+                console.log({ interactions });
+                console.log({ postData });
+
+                const postWithInteractions = {
+                    ...postData,
+                    postPlatforms: postData.postPlatforms.map(x => ({
+                        ...x,
+                        numberOfLikes: interactions.find(i => i.id == x.id)?.interactions?.number_of_likes ?? 0,
+                        numberOfComments: interactions.find(i => i.id == x.id)?.interactions?.number_of_comments ?? 0,
+                        numberOfShares: interactions.find(i => i.id == x.id)?.interactions?.number_of_shares ?? 0,
+                    }))
+                };
+                console.log({ postWithInteractions });
+
+                setPostData(postWithInteractions);
+                hasFetchedInteractions.current = true;
+            } catch (error) {
+                console.error("Error fetching interactions:", error);
+            }
+        };
+
+        fetchInteractions();
+    }, [postData]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-9 w-full">
@@ -41,9 +78,9 @@ const PostDetail = () => {
                     </div>
 
                     <div className="flex items-center space-x-4 my-4 text-gray-700">
-                        <p className="flex items-center"><span className="text-lg mr-1">❤️</span> {postPlatform.likes ?? 0}</p>
-                        <p className="flex items-center"><span className="text-lg mr-1">🔁</span> {postPlatform.shares ?? 0}</p>
-                        <p className="flex items-center"><span className="text-lg mr-1">💬</span> {postPlatform.comments ?? 0}</p>
+                        <p className="flex items-center"><span className="text-lg mr-1">❤️</span> {postPlatform.numberOfLikes ?? 0}</p>
+                        <p className="flex items-center"><span className="text-lg mr-1">🔁</span> {postPlatform.numberOfShares ?? 0}</p>
+                        <p className="flex items-center"><span className="text-lg mr-1">💬</span> {postPlatform.numberOfComments ?? 0}</p>
                     </div>
 
                     <p className="text-gray-500 text-sm">{postPlatform.status == PostStatus.SUCCESS ? formatTimestamp(postPlatform?.posted_at) : 'Not posted yet.'}</p>

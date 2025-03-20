@@ -38,13 +38,22 @@ const ViewHistory = () => {
                     {myPosts.map((post) => (
                         <div
                             key={post.id}
-                            className="rounded-[8px] bg-white p-[16px] px-4 py-4 mb-3"
+                            className="rounded-[8px] bg-white p-4 mb-3 flex justify-between items-center"
                             onClick={() => handlePostClick(post.id)}
                         >
-                            <p className="text-gray-700 font-medium">{post.content}</p>
-                            <p className="text-sm text-gray-500">{formatTimestamp(post.scheduled_time)}</p>
-                        </div>
+                            <div className="flex-1">
+                                <p className="text-gray-700 font-medium">{post.content}</p>
+                                <p className="text-sm text-gray-500">
+                                    {post.scheduled_time ? formatTimestamp(post.scheduled_time) : 'No scheduled time'}
+                                </p>
+                            </div>
 
+                            <div className="flex space-x-2">
+                                {post.media_urls?.map((imageUrl, index) => (
+                                    <img key={index} src={imageUrl} alt="media" className="h-16 w-16 object-cover rounded" />
+                                ))}
+                            </div>
+                        </div>
                     ))}
                 </>
             )}

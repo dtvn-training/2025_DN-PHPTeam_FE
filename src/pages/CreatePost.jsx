@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FaLinkedin, FaTwitter, FaUpload, FaTimes } from 'react-icons/fa';
 import { isValidImageType } from '../utils/ValidationImageType';
 import { getSocialAccountsOfUser } from '../services/socialAccountService';
+import { getEnhancedContent } from '../services/contentService';
 import { createPost } from '../services/postService';
 import { HttpStatusCode } from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
@@ -9,15 +10,19 @@ import Loading from '../components/Loading';
 import { formatScheduleTime } from '../utils/ConvertDateTime';
 
 export default function CreatePost() {
+    const accessToken = localStorage.getItem('access_token');
     const fileInputRef = useRef(null);
-    const [schedule, setSchedule] = useState(false);
     const [content, setContent] = useState('');
+    const [schedule, setSchedule] = useState(false);
     const [scheduledTime, setScheduledTime] = useState('');
+    const [useLLM, setUseLLM] = useState(false);
     const [imagesPreview, setImagesPreview] = useState([]);
     const [images, setImages] = useState([]);
     const [listPlatforms, setListPlatforms] = useState([]);
     const [mySocialAccounts, setMySocialAccounts] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [formattedContent, setFormattedContent] = useState("");
+    const [formattedExplanations, setFormattedExplanations] = useState("");
 
     useEffect(() => {
         const fetchSocialAccounts = async () => {
@@ -29,16 +34,69 @@ export default function CreatePost() {
         fetchSocialAccounts();
     }, []);
 
+    useEffect(() => {
+        const handleMessage = (event) => {
+            if (event.origin !== 'http://localhost:8000') return;
+
+            const { socialAccount } = event.data;
+            if (socialAccount) {
+                console.log(socialAccount);
+                setMySocialAccounts((prev) => [
+                    ...prev,
+                    {
+                        screen_name: socialAccount.screen_name,
+                        platform: socialAccount.platform,
+                    },
+                ]);
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        return () => {
+            window.removeEventListener('message', handleMessage);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (useLLM) {
+            (async () => {
+                const result = await getEnhancedContent(content);
+
+                if (result.status !== HttpStatusCode.Ok) {
+                    toast.error('Cannot fetch the enhanced version of content.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                }
+
+                const improvedPost = result.data['improved_post']
+                    .replace(/\*\*(.*?)\*\*/g, '<span style="color: orange;">$1</span>')
+                    .replace(/###\s*(.*?)\n/g, "<strong>$1</strong><br>")
+                    .replace(/\n/g, "<br>")
+
+                setFormattedContent(improvedPost);
+
+                const explanations = result.data['explanations']
+                    .replace(/\*\*(.*?)\*\*/g, '<span style="color: orange;">$1</span>')
+                    .replace(/###\s*(.*?)\n/g, "<strong>$1</strong><br>")
+                    .replace(/\n/g, "<br>")
+
+                setFormattedExplanations(explanations);
+            })();
+        }
+    }, [useLLM]);
+
     const allPlatforms = [
         {
             name: 'LinkedIn',
             icon: <FaLinkedin className="mr-[8px] text-[#1D4ED8]" />,
-            link: `http://localhost:8000/login/linkedin`,
+            link: `http://localhost:8000/login/linkedin?access-token=${accessToken}`,
         },
         {
             name: 'Twitter',
             icon: <FaTwitter className="mr-[8px] text-blue-400" />,
-            link: `http://localhost:8000/login/twitter`,
+            link: `http://localhost:8000/login/twitter?access-token=${accessToken}`,
         },
     ];
 
@@ -56,6 +114,12 @@ export default function CreatePost() {
         setScheduledTime(formatScheduleTime(scheduledTime));
     }
 
+    const handleUseLlmButton = () => {
+        setUseLLM(!useLLM);
+        setFormattedContent('Loading .....');
+        setFormattedExplanations('Loading .....');
+    }
+
     const onSubmit = async () => {
         if (listPlatforms.length === 0) {
             toast.error("Please select at least one platform.", {
@@ -67,21 +131,28 @@ export default function CreatePost() {
 
         setLoading(true);
 
-        const mediaUrls = images.map((image) => URL.createObjectURL(image));
+        try {
+            const response = await createPost(content, images, listPlatforms, schedule ? scheduledTime : null);
 
-        const response = await createPost(content, mediaUrls, scheduledTime, listPlatforms);
-
-        setLoading(false);
-        if (response.status == HttpStatusCode.Ok) {
-            toast.success(response.messages[0], {
+            if (response?.status === HttpStatusCode.Ok) {
+                toast.success(response?.messages?.[0] || "Post created successfully!", {
+                    position: "top-right",
+                    autoClose: 3000,
+                });
+            } else {
+                toast.error(response?.messages?.[0] || "Failed to create post.", {
+                    position: "top-right",
+                    autoClose: 3000,
+                });
+            }
+        } catch (error) {
+            toast.error("Something went wrong! Please try again.", {
                 position: "top-right",
                 autoClose: 3000,
             });
-        } else {
-            toast.error(response.messages[0], {
-                position: "top-right",
-                autoClose: 3000,
-            });
+            console.error("Error creating post:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -124,6 +195,7 @@ export default function CreatePost() {
         <div className="rounded-[8px] bg-white p-[16px]">
             <form>
                 <ToastContainer />
+
                 <div className="mb-[16px]">
                     <label htmlFor="content" className="mb-[8px] block text-[16px] text-[#374151]">
                         Content
@@ -162,6 +234,44 @@ export default function CreatePost() {
                     </div>
                 )}
 
+                <button
+                    type="button"
+                    className="flex items-center rounded  bg-blue-600 p-2 hover:opacity-[0.8] text-amber-50 mb-4"
+                    onClick={() => handleUseLlmButton()}
+                >
+                    USE LLM
+                </button>
+
+                <div className="mb-[16px]">
+                    <label htmlFor="content" className="mb-[8px] block text-[16px] text-[#374151]">
+                        Enhanced Version
+                    </label>
+
+                    <div
+                        id="content"
+                        name="content"
+                        className="w-full rounded-[8px] border-[1px] border-[#D1D5DB] p-[12px_24px] text-[#4B5563] outline-none"
+                        contentEditable={true}
+                        dangerouslySetInnerHTML={{ __html: formattedContent }}
+                        value
+                    ></div>
+                </div>
+
+                <div className="mb-[16px]">
+                    <label htmlFor="content" className="mb-[8px] block text-[16px] text-[#374151]">
+                        Key Improvements and Why:
+                    </label>
+
+                    <div
+                        id="content"
+                        name="content"
+                        className="w-full rounded-[8px] border-[1px] border-[#D1D5DB] p-[12px_24px] text-[#4B5563] outline-none"
+                        contentEditable={true}
+                        dangerouslySetInnerHTML={{ __html: formattedExplanations }}
+                        value
+                    ></div>
+                </div>
+
                 <div>
                     <p className="mb-[8px] block text-[16px] text-[#374151]">Select images</p>
                     <button
@@ -174,10 +284,10 @@ export default function CreatePost() {
                     <input type="file" multiple className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
 
                     {imagesPreview.length > 0 && (
-                        <div className="mt-4 grid grid-cols-4 gap-2">
+                        <div className="mt-4 flex flex-row items-center justify-start gap-3">
                             {imagesPreview.map((src, index) => (
-                                <div key={index} className="relative">
-                                    <img src={src} alt="Uploaded" className="h-24 w-24 rounded object-cover" />
+                                <div key={index} className="relative w-fit">
+                                    <img src={src} alt="Uploaded" className="h-24 w-fit rounded object-cover" />
                                     <button
                                         type="button"
                                         onClick={() => removeImage(index)}
